@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { compressImage, validateImage } from '@/lib/imageUtils';
 
 interface DetectionSectionProps {
   translations: any;
@@ -39,24 +40,54 @@ interface DetectionResult {
 const DetectionSection: React.FC<DetectionSectionProps> = ({ translations, currentLanguage }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
   const [speakingLang, setSpeakingLang] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    // Validate file
+    const validation = validateImage(file);
+    if (!validation.valid) {
+      toast.error(validation.error);
+      return;
+    }
+
+    setIsCompressing(true);
+    
+    try {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
+      reader.onload = async (e) => {
+        const rawImage = e.target?.result as string;
+        
+        // Compress for mobile optimization
+        const compressed = await compressImage(rawImage, {
+          maxWidth: 1024,
+          maxHeight: 1024,
+          quality: 0.85,
+          maxSizeKB: 600
+        });
+        
+        setSelectedImage(compressed);
         setDetectionResult(null);
+        setRetryCount(0);
+        setIsCompressing(false);
+        toast.success('📷 Image ready for analysis');
       };
       reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Image processing error:', error);
+      toast.error('Failed to process image. Please try again.');
+      setIsCompressing(false);
     }
   };
 
@@ -125,17 +156,37 @@ const DetectionSection: React.FC<DetectionSectionProps> = ({ translations, curre
 
       if (error) {
         console.error('Detection error:', error);
-        toast.error('❌ Detection failed. Please try again.');
+        
+        // Handle specific error types
+        if (error.message?.includes('429') || error.message?.includes('rate')) {
+          toast.error('🕐 Too many requests. Please wait a moment and try again.');
+        } else if (error.message?.includes('timeout')) {
+          toast.error('⏱️ Request timed out. Try with a smaller image.');
+        } else {
+          toast.error('❌ Detection failed. Please try again.');
+        }
+        
+        setRetryCount(prev => prev + 1);
+        return;
+      }
+
+      // Check for error in response body
+      if (data?.error) {
+        console.error('Detection error in response:', data.error);
+        toast.error(data.error);
+        setRetryCount(prev => prev + 1);
         return;
       }
 
       console.log('Detection result:', data);
       setDetectionResult(data as DetectionResult);
-      toast.success(`🌱 Detected: ${data.issue} in ${data.crop}`);
+      setRetryCount(0);
+      toast.success(`🌱 Detected: ${data.issue || data.crop || 'Analysis complete'}`);
       
     } catch (error) {
       console.error('Error during detection:', error);
       toast.error('❌ An error occurred. Please try again.');
+      setRetryCount(prev => prev + 1);
     } finally {
       setIsDetecting(false);
     }
