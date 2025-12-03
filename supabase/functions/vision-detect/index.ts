@@ -5,18 +5,62 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10; // requests per window (lower for image processing)
+const RATE_WINDOW_MS = 60000; // 1 minute
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB base64
+
+function checkRateLimit(clientIP: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(clientIP);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(clientIP, { count: 1, resetTime: now + RATE_WINDOW_MS });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limiting check
+  const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(clientIP)) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please wait a moment and try again." }),
+      { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
-    const { imageBase64, language = "en" } = await req.json();
+    const body = await req.json();
+    const imageBase64 = body?.imageBase64;
+    const language = body?.language || "en";
     
-    if (!imageBase64) {
+    // Input validation
+    if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
-        JSON.stringify({ error: "Image is required" }),
+        JSON.stringify({ error: "Image is required and must be a string" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    // Check image size (base64 is ~33% larger than binary)
+    if (imageBase64.length > MAX_IMAGE_SIZE) {
+      return new Response(
+        JSON.stringify({ error: "Image is too large. Maximum 5MB allowed." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

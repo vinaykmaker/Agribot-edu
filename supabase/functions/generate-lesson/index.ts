@@ -5,13 +5,70 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 15; // requests per window
+const RATE_WINDOW_MS = 60000; // 1 minute
+const MAX_INPUT_LENGTH = 500; // max characters for text inputs
+
+function checkRateLimit(clientIP: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(clientIP);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(clientIP, { count: 1, resetTime: now + RATE_WINDOW_MS });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limiting check
+  const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(clientIP)) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please wait a moment and try again." }),
+      { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
-    const { topic, cropType, season, language = "en" } = await req.json();
+    const body = await req.json();
+    const topic = body?.topic;
+    const cropType = body?.cropType;
+    const season = body?.season;
+    const language = body?.language || "en";
+    
+    // Input validation - check string types and lengths
+    if (topic && (typeof topic !== "string" || topic.length > MAX_INPUT_LENGTH)) {
+      return new Response(
+        JSON.stringify({ error: "Topic must be a string with max 500 characters" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (cropType && (typeof cropType !== "string" || cropType.length > MAX_INPUT_LENGTH)) {
+      return new Response(
+        JSON.stringify({ error: "Crop type must be a string with max 500 characters" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (season && (typeof season !== "string" || season.length > MAX_INPUT_LENGTH)) {
+      return new Response(
+        JSON.stringify({ error: "Season must be a string with max 500 characters" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
