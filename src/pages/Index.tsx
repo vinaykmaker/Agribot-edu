@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import VisionDetection from '@/components/VisionDetection';
-import VoiceAssistant from '@/components/VoiceAssistant';
-import AgribotChat from '@/components/AgribotChat';
 import LearningSection from '@/components/LearningSection';
 import CommunitySection from '@/components/CommunitySection';
 import FeaturesSection from '@/components/FeaturesSection';
@@ -74,26 +72,7 @@ const Index = () => {
           currentLanguage={currentLanguage} 
           translations={currentTranslations} 
         />
-        
-        {/* Chatbot Section */}
-        <section id="chatbot" className="py-12 md:py-20 bg-background">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
-                {currentLanguage === 'hi' ? '💬 AI खेती सलाहकार' :
-                 currentLanguage === 'kn' ? '💬 AI ಕೃಷಿ ಸಲಹೆಗಾರ' :
-                 '💬 AI Farming Advisor'}
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                {currentLanguage === 'hi' ? 'खेती से जुड़े किसी भी सवाल का जवाब पाएं' :
-                 currentLanguage === 'kn' ? 'ಕೃಷಿ ಸಂಬಂಧಿತ ಯಾವುದೇ ಪ್ರಶ್ನೆಗೆ ಉತ್ತರ ಪಡೆಯಿರಿ' :
-                 'Get answers to any farming-related questions'}
-              </p>
-            </div>
-            <AgribotChat currentLanguage={currentLanguage} translations={currentTranslations} />
-          </div>
-        </section>
-        
+             
         <CommunitySection translations={currentTranslations} currentLanguage={currentLanguage} />
         
         <FeaturesSection translations={currentTranslations} />
