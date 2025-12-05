@@ -25,11 +25,12 @@ interface DetectionResult {
 interface VisionDetectionProps {
   currentLanguage: string;
   translations: any;
+  onDetectionResult?: (result: DetectionResult | null) => void;
 }
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
 
-const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, translations }) => {
+const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, translations, onDetectionResult }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
@@ -38,6 +39,12 @@ const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, tran
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { toggle, isSpeaking } = useSpeechSynthesis({ language: currentLanguage });
+
+  // Notify parent of detection results
+  const handleSetResult = useCallback((newResult: DetectionResult | null) => {
+    setResult(newResult);
+    onDetectionResult?.(newResult);
+  }, [onDetectionResult]);
 
   const getText = useCallback((obj: { en: string; hi: string; kn: string } | undefined) => 
     getLocalizedText(obj, currentLanguage), [currentLanguage]);
@@ -70,7 +77,7 @@ const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, tran
         : rawDataUrl;
 
       setSelectedImage(imageData);
-      setResult(null);
+      handleSetResult(null);
 
       // Analyze image quality
       const quality = await analyzeImageQuality(imageData);
@@ -97,7 +104,7 @@ const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, tran
     if (!selectedImage) return;
 
     setIsAnalyzing(true);
-    setResult(null);
+    handleSetResult(null);
 
     try {
       const { data, error } = await supabase.functions.invoke('vision-detect', {
@@ -109,7 +116,7 @@ const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, tran
 
       if (error) throw error;
       
-      setResult(data);
+      handleSetResult(data);
 
       if (data.detected) {
         toast({
@@ -140,7 +147,7 @@ const VisionDetection: React.FC<VisionDetectionProps> = ({ currentLanguage, tran
 
   const clearImage = () => {
     setSelectedImage(null);
-    setResult(null);
+    handleSetResult(null);
     setImageQuality(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
