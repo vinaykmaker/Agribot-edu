@@ -1,74 +1,161 @@
-[# Welcome to your Lovable project
+# 🌾 Agribot — AI Farmer Education & Guidance Assistant
 
-## Project info
+[![Status: Prototype](https://img.shields.io/badge/status-prototype-orange.svg)](https://github.com/)
+[![Open Source](https://img.shields.io/badge/open%20source-yes-brightgreen.svg)](https://github.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Made with OpenAI](https://img.shields.io/badge/Powered%20by-OpenAI-blue.svg)](https://openai.com/)
+[![Buildthon](https://img.shields.io/badge/Buildthon-OpenAI%20x%20NxtWave-blueviolet.svg)](https://www.nxtwave.com/)
+[![Platform](https://img.shields.io/badge/platform-Web%20%7C%20Mobile-blue.svg)](#)
+[![Languages](https://img.shields.io/badge/tech-Node.js%20|%20Python%20|%20Flutter-lightgrey.svg)](#)
 
-**URL**: https://lovable.dev/projects/10cebcf6-6b74-4cc4-accb-a78e2b3faac6
+Agribot is a voice-first, AI-powered agricultural learning and guidance assistant that helps farmers, agriculture students, and agri‑entrepreneurs with high‑accuracy crop guidance, personalized learning, and disease detection — accessible 24/7 and optimized for low-end devices.
 
-## How can I edit this code?
+Built for the OpenAI x NxtWave Buildthon — State Level under:
+- AI for Everyday India
+- AI for Indian Business
+- AI for Social Good
+- AI for Education
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## ✨ Why Agribot?
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/10cebcf6-6b74-4cc4-accb-a78e2b3faac6) and start prompting.
+- Voice-first: hands-free, noise tolerant, multilingual & code-mixed inputs.
+- Education + Diagnosis: text/audio/video lessons plus high-accuracy disease detection.
+- Offline-capable: caches essential lessons and Q&A for low-connectivity use.
+- Personalized: adapts lessons by crop, region, season, soil and history.
+- Farmer-friendly: simple language, step-by-step guidance, daily micro-tips.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🔑 Key Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- 🎧 Voice Assistant: Natural farmer-language understanding, TTS/SSML-ready responses, dialogue history.
+- 📘 Learning Engine: Text lessons, audio lessons, short AI-generated video scripts and quizzes.
+- 🧪 Disease Detection: Image preprocessing → multi-stage verification → classifier + severity estimation.
+- 🚀 Offline Mode: SQLite cache, light STT/TTS fallback, delta sync when online.
+- 📊 Dashboard: Personalized crop reports, progress tracking, recovery history.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🧩 System Architecture (high level)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+User (Voice / Text / Image)
+        │
+        ▼
+AI Voice Agent / LLM (OpenAI)
+        │
+        ├── Educational Engine
+        ├── Disease Detection Module
+        ├── Personalization Engine
+        └── Offline Cache System
+        │
+        ▼
+Mobile App / Web Interface
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🛠 Suggested Tech Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- LLM & Voice: OpenAI (GPT / Vision / Realtime Voice)
+- Backend: Node.js (Express) or Python (FastAPI)
+- Detection Model: PyTorch / TensorFlow (EfficientNet / ResNet transfer learning)
+- Mobile: Flutter (recommended) or React Native
+- Web: React
+- STT/TTS: Whisper / OpenAI Realtime / lightweight local fallback
+- Data: SQLite (offline) + PostgreSQL (cloud)
+- Deployment: Vercel / Render / Railway; Docker for services
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📁 Example Folder Structure
 
-**Use GitHub Codespaces**
+Agribot/
+├── frontend/            # Flutter / React app
+├── backend/             # API server (Node/Express or FastAPI)
+├── detection-model/     # Model training and inference code
+├── offline-data/        # Cached lessons & assets for offline mode
+├── assets/              # Images, audio prompts, icons
+└── README.md
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## ⚡ Quickstart (developer)
 
-This project is built with:
+1. Clone the repo:
+   git clone https://github.com/your-org/agribot.git
+2. Configure environment (.env / .env.example):
+   - OPENAI_API_KEY
+   - DATABASE_URL / STORAGE_URL
+3. Start services:
+   - Backend: npm install && npm run dev  OR  pip install -r requirements.txt && uvicorn app.main:app --reload
+   - Frontend: npm install && npm start  OR  flutter run
+4. (Optional) Start detection service: python inference_service.py
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Tip: Add a docker-compose for reproducible local dev and replace placeholder badges with repo-specific URLs.
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/10cebcf6-6b74-4cc4-accb-a78e2b3faac6) and click on Share -> Publish.
+## 🔬 Disease Detection Pipeline (outline)
 
-## Can I connect a custom domain to my Lovable project?
+1. Preprocess: denoise, resize, segment leaf area  
+2. Verify: image quality checks (blur, lighting, occlusion)  
+3. Feature extraction: CNN + transfer learning  
+4. Classification: disease type + confidence score  
+5. Severity: lesion coverage %, health index  
+6. Output: treatment steps, preventive measures, follow-up schedule
 
-Yes, you can!
+Include a lightweight quantized model for offline fallback.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-](https://rogi-paksh-ai.lovable.app)
+## 📚 Personalization & Education Engine
+
+- Store per-user context: crops, region, soil, weather, disease history  
+- Adaptive learning paths: beginner → intermediate → expert  
+- LLM produces farmer-friendly language and local-language translations  
+- Generate voice scripts and short video scripts for lessons
+
+---
+
+## 🔒 Privacy & Safety
+
+- Collect only necessary data; encrypt sensitive info at rest and in transit.  
+- Provide confidence scores and encourage field visits or expert consults for low-confidence cases.  
+- Log anonymized metrics for model improvement.
+
+---
+
+## 🛣 Roadmap & Future Enhancements
+
+- Marketplace for seeds, fertilizers and tools  
+- Drone integration for field monitoring  
+- Soil test analyzer integration  
+- Community learning hub and peer Q&A  
+- Government schemes & subsidy alerts
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome!
+1. Fork the repo
+2. Create branch feature/<short-description>
+3. Add tests & docs
+4. Open a PR with a clear description
+
+Add labels such as good-first-issue and help wanted to guide contributors.
+
+---
+
+## 📄 License
+
+MIT — add a LICENSE file.
+
+---
+
+## 👨‍💻 Developed By
+
+VINAY — AI Developer • Agriculture Innovator • Buildthon Participant
+
+---
