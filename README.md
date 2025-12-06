@@ -16,6 +16,9 @@ Built for the OpenAI x NxtWave Buildthon — State Level under:
 - AI for Social Good
 - AI for Education
 
+
+live link: https://rogi-paksh-ai.lovable.app
+
 ---
 
 ## ✨ Why Agribot?
@@ -148,6 +151,7 @@ Add labels such as good-first-issue and help wanted to guide contributors.
 ---
 ## 👨‍💻 Developed By
 
-VINAY — AI Developer • Agriculture Innovator • Buildthon Participant
+VINAY — AI Developer , Sathwik Gowda ph - webdeeveloper
+• Agriculture Innovator • Buildthon Participant
 
 ---
