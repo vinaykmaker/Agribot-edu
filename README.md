@@ -33,7 +33,6 @@ Built for the OpenAI x NxtWave Buildthon — State Level under:
 - 🎧 Voice Assistant: Natural farmer-language understanding, TTS/SSML-ready responses, dialogue history.
 - 📘 Learning Engine: Text lessons, audio lessons, short AI-generated video scripts and quizzes.
 - 🧪 Disease Detection: Image preprocessing → multi-stage verification → classifier + severity estimation.
-- 🚀 Offline Mode: SQLite cache, light STT/TTS fallback, delta sync when online.
 - 📊 Dashboard: Personalized crop reports, progress tracking, recovery history.
 
 ---
@@ -63,7 +62,7 @@ Mobile App / Web Interface
 - Mobile: Flutter (recommended) or React Native
 - Web: React
 - STT/TTS: Whisper / OpenAI Realtime / lightweight local fallback
-- Data: SQLite (offline) + PostgreSQL (cloud)
+- Data: SQLite + PostgreSQL (cloud)
 - Deployment: Vercel / Render / Railway; Docker for services
 
 ---
@@ -147,13 +146,6 @@ Contributions welcome!
 Add labels such as good-first-issue and help wanted to guide contributors.
 
 ---
-
-## 📄 License
-
-MIT — add a LICENSE file.
-
----
-
 ## 👨‍💻 Developed By
 
 VINAY — AI Developer • Agriculture Innovator • Buildthon Participant
