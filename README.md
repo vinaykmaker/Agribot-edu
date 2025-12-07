@@ -17,7 +17,7 @@ Built for the OpenAI x NxtWave Buildthon — State Level under:
 - AI for Education
 
 
-live link: https://rogi-paksh-ai.lovable.app
+live link: [https://.lovable.app](https://agribot-edu.lovable.app)
 
 ---
 
